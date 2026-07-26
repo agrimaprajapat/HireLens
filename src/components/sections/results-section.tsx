@@ -1,6 +1,7 @@
 import { CircleAlert, Loader2, Sparkles } from "lucide-react";
 
 import { AnalysisReport } from "@/components/sections/analysis-report";
+import { SaveToDashboard } from "@/components/dashboard/save-to-dashboard";
 import { LensMark } from "@/components/layout/logo";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
@@ -15,18 +16,32 @@ interface ResultsSectionProps {
   status: AnalysisStatus;
   result: ResumeAnalysis | null;
   error: AnalysisFlowError | null;
+  resumeName: string;
 }
 
 /**
  * Result panel. Renders one of four states — empty placeholder, loading,
  * a structured error, or the AI analysis — all within the HireLens system.
  */
-function ResultsSection({ status, result, error }: ResultsSectionProps) {
+function ResultsSection({
+  status,
+  result,
+  error,
+  resumeName,
+}: ResultsSectionProps) {
   return (
     <section id="results" className="scroll-mt-24 pb-20 sm:pb-24">
       <Container className="max-w-3xl">
         {status === "success" && result ? (
-          <AnalysisReport analysis={result} />
+          <>
+            <AnalysisReport analysis={result} />
+            <SaveToDashboard
+              type="resume-analysis"
+              payload={result}
+              resumeName={resumeName}
+              defaultTitle="Resume Analysis"
+            />
+          </>
         ) : (
           <Card
             className={cn(

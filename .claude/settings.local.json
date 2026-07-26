@@ -33,7 +33,20 @@
       "Bash(node -e \"const t=require\\('openai'\\); const c=new t.AzureOpenAI\\({endpoint:'https://x',apiKey:'x',apiVersion:'v',deployment:'d'}\\); console.log\\('client is OpenAI instance:', c instanceof t.OpenAI || c instanceof t.default || 'n/a'\\)\")",
       "Bash(curl -s -o /dev/null -w \"server:%{http_code}\\\\n\" http://localhost:61017/)",
       "Bash(node clrun.mjs 61017 enthusiastic file job.pdf)",
-      "Bash(node clrun.mjs 61017 professional file job.docx \"Taylor Morgan\" \"Acme Corp\")"
+      "Bash(node clrun.mjs 61017 professional file job.docx \"Taylor Morgan\" \"Acme Corp\")",
+      "Bash(node -e \"console.log\\('@clerk/nextjs', require\\('./node_modules/@clerk/nextjs/package.json'\\).version\\); console.log\\('@prisma/client', require\\('./node_modules/@prisma/client/package.json'\\).version\\); console.log\\('prisma', require\\('./node_modules/prisma/package.json'\\).version\\)\")",
+      "Bash(npm view *)",
+      "Bash(node -e \"const r=r=>require\\('./node_modules/'+r+'/package.json'\\).version; console.log\\('react',r\\('react'\\),'| @clerk/nextjs',r\\('@clerk/nextjs'\\),'| @prisma/client',r\\('@prisma/client'\\),'| prisma',r\\('prisma'\\)\\)\")",
+      "Bash(node -e \"const r=r=>require\\('./node_modules/'+r+'/package.json'\\).version; console.log\\('@prisma/client',r\\('@prisma/client'\\),'| prisma',r\\('prisma'\\)\\)\")",
+      "Bash(node -e \"const c=require\\('@clerk/nextjs'\\); console.log\\('SignedIn:',typeof c.SignedIn,'| SignedOut:',typeof c.SignedOut,'| UserButton:',typeof c.UserButton\\)\")",
+      "Bash(curl -s -o /dev/null -w \"landing:%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"status:%{http_code}\\\\n\" http://localhost:3000/api/saved/resume-analysis)",
+      "Bash(curl -s -o /dev/null -w \"status:%{http_code} redirect:%{redirect_url}\\\\n\" http://localhost:3000/dashboard)",
+      "Bash(curl -s -o /dev/null -w \"status:%{http_code}\\\\nredirect:%{redirect_url}\\\\n\" -H \"Accept: text/html\" http://localhost:3000/dashboard)",
+      "Bash(npx prisma *)",
+      "Bash(curl -s -w \"\\\\n[%{http_code}]\\\\n\" http://localhost:3000/api/credits)",
+      "Bash(curl -s -w \"\\\\n[%{http_code}]\\\\n\" -H \"Content-Type: application/json\" -d '{\"resumeText\":\"Jane Smith Engineer\"}' http://localhost:3000/api/resume/analyse)",
+      "Bash(curl -s -o /dev/null -w \"[%{http_code}]\\\\n\" http://localhost:3000/pricing)"
     ]
   }
 }

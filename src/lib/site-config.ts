@@ -17,9 +17,9 @@ export type NavLink = {
 };
 
 export const navLinks: NavLink[] = [
-  { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Features", href: "/#features" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "FAQ", href: "/#faq" },
 ];
 
 export type Feature = {
@@ -103,9 +103,9 @@ export const faqs: FaqItem[] = [
 
 export const footerLinks = {
   Product: [
-    { label: "Features", href: "#features" },
-    { label: "Pricing", href: "#pricing" },
-    { label: "FAQ", href: "#faq" },
+    { label: "Features", href: "/#features" },
+    { label: "Pricing", href: "/pricing" },
+    { label: "FAQ", href: "/#faq" },
   ],
   Company: [
     { label: "About", href: "#" },

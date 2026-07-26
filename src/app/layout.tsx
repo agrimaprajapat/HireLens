@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Fraunces } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 
+import { CreditsProvider } from "@/components/credits/credits-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,10 +29,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${fraunces.variable} font-sans`}>
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${geistSans.variable} ${fraunces.variable} font-sans`}>
+          <CreditsProvider>{children}</CreditsProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

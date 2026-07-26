@@ -1,0 +1,69 @@
+// HireLens data model.
+//
+// Users are authenticated by Clerk; we mirror a minimal User row keyed by the
+// Clerk user id (lazily upserted on first save). Every saved item references its
+// owning user and cascades on delete. The AI results are stored as JSON payloads
+// — they are display-only, richly nested structures that we never query
+// relationally, and their shape is already defined by our zod schemas.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String
+  name      String?
+  credits   Int      @default(3)
+  createdAt DateTime @default(now())
+
+  resumeAnalyses ResumeAnalysis[]
+  jobMatches     JobMatch[]
+  coverLetters   CoverLetter[]
+}
+
+model ResumeAnalysis {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  resumeName String
+  payload    Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model JobMatch {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  resumeName String
+  payload    Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model CoverLetter {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  resumeName String
+  payload    Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}

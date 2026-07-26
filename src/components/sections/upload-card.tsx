@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
+import { GenerationGate } from "@/components/credits/generation-gate";
+import type { GenerationGateState } from "@/components/credits/credits-provider";
 import type { useResumeUpload } from "@/hooks/use-resume-upload";
 import { RESUME_UPLOAD } from "@/lib/constants";
 import { formatFileSize } from "@/lib/resume";
@@ -18,6 +20,8 @@ interface UploadCardProps {
   onAnalyse: () => void;
   /** Whether an extraction request is currently in flight. */
   isAnalysing: boolean;
+  /** Credit/sign-in gate for AI generation. */
+  gate: GenerationGateState;
 }
 
 /**
@@ -27,7 +31,7 @@ interface UploadCardProps {
  * extraction request is owned by the parent workspace. This component renders
  * that state and forwards intent — it never touches parsing or the network.
  */
-function UploadCard({ upload, onAnalyse, isAnalysing }: UploadCardProps) {
+function UploadCard({ upload, onAnalyse, isAnalysing, gate }: UploadCardProps) {
   const {
     inputRef,
     file,
@@ -207,7 +211,7 @@ function UploadCard({ upload, onAnalyse, isAnalysing }: UploadCardProps) {
             size="lg"
             className="sm:flex-1"
             onClick={onAnalyse}
-            disabled={!isReady || isBusy}
+            disabled={!isReady || isBusy || gate.blocked}
           >
             {isAnalysing ? (
               <>
@@ -222,6 +226,8 @@ function UploadCard({ upload, onAnalyse, isAnalysing }: UploadCardProps) {
             )}
           </Button>
         </div>
+
+        <GenerationGate gate={gate} />
       </Container>
     </section>
   );

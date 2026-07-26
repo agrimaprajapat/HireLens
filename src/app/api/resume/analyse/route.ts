@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { analyseResume } from "@/lib/ai/analyse-resume";
+import { chargeCredits, ensureCredits } from "@/lib/credit-guard";
 import type { AnalyseResult } from "@/lib/ai/schema";
 
 // The Azure OpenAI call needs the Node.js runtime and some headroom on latency.
@@ -32,6 +33,9 @@ function statusFor(result: AnalyseResult): number {
  * browser.
  */
 export async function POST(request: Request) {
+  const guard = await ensureCredits("resume-analysis");
+  if ("error" in guard) return guard.error;
+
   let body: unknown;
   try {
     body = await request.json();
@@ -63,5 +67,6 @@ export async function POST(request: Request) {
   }
 
   const result = await analyseResume(resumeText);
+  if (result.ok) await chargeCredits(guard.userId, "resume-analysis");
   return NextResponse.json(result, { status: statusFor(result) });
 }

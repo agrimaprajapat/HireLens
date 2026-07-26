@@ -48,7 +48,7 @@ function LensMark({ className }: { className?: string }) {
 function Logo({ className }: { className?: string }) {
   return (
     <Link
-      href="#top"
+      href="/"
       aria-label={`${siteConfig.name} home`}
       className={cn(
         "group flex items-center gap-2.5 rounded-md outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",

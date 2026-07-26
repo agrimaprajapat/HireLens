@@ -5,6 +5,7 @@ import {
   COVER_LETTER_TONES,
   type CoverLetterTone,
 } from "@/lib/ai/cover-letter-schema";
+import { chargeCredits, ensureCredits } from "@/lib/credit-guard";
 import { resolveJobDescription } from "@/lib/job-match/inputs";
 import { extractResumeText } from "@/lib/pdf/extract";
 import { validateResumeFile } from "@/lib/resume";
@@ -59,6 +60,9 @@ function optionalField(formData: FormData, name: string): string | undefined {
  * `generateCoverLetter`. Azure OpenAI is only reached from the server.
  */
 export async function POST(request: Request) {
+  const guard = await ensureCredits("cover-letter");
+  if ("error" in guard) return guard.error;
+
   let formData: FormData;
   try {
     formData = await request.formData();
@@ -116,6 +120,7 @@ export async function POST(request: Request) {
     additionalNotes: optionalField(formData, "additionalNotes"),
   });
 
+  if (result.ok) await chargeCredits(guard.userId, "cover-letter");
   return NextResponse.json(result, {
     status: result.ok ? 200 : statusForCode(result.error.code),
   });

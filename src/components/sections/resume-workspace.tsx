@@ -6,6 +6,7 @@ import { CoverLetterSection } from "@/components/sections/cover-letter-section";
 import { JobMatchSection } from "@/components/sections/job-match-section";
 import { ResultsSection } from "@/components/sections/results-section";
 import { UploadCard } from "@/components/sections/upload-card";
+import { useCredits, useGenerationGate } from "@/components/credits/credits-provider";
 import { useCoverLetter } from "@/hooks/use-cover-letter";
 import { useJobMatch } from "@/hooks/use-job-match";
 import { useResumeAnalysis } from "@/hooks/use-resume-analysis";
@@ -24,6 +25,8 @@ function ResumeWorkspace() {
   const analysis = useResumeAnalysis();
   const jobMatch = useJobMatch();
   const coverLetter = useCoverLetter();
+  const gate = useGenerationGate();
+  const { refresh: refreshCredits } = useCredits();
 
   const { file } = upload;
   const resetAnalysis = analysis.reset;
@@ -37,6 +40,20 @@ function ResumeWorkspace() {
     resetCoverLetter();
   }, [file, resetAnalysis, resetJobMatch, resetCoverLetter]);
 
+  // A successful generation deducts a credit server-side; refresh the balance.
+  const analysisStatus = analysis.status;
+  const jobMatchStatus = jobMatch.status;
+  const coverLetterStatus = coverLetter.status;
+  useEffect(() => {
+    if (
+      analysisStatus === "success" ||
+      jobMatchStatus === "success" ||
+      coverLetterStatus === "success"
+    ) {
+      refreshCredits();
+    }
+  }, [analysisStatus, jobMatchStatus, coverLetterStatus, refreshCredits]);
+
   const handleAnalyse = () => {
     if (upload.file) analysis.analyse(upload.file);
   };
@@ -49,21 +66,25 @@ function ResumeWorkspace() {
         upload={upload}
         onAnalyse={handleAnalyse}
         isAnalysing={analysis.isAnalysing}
+        gate={gate}
       />
       <ResultsSection
         status={analysis.status}
         result={analysis.result}
         error={analysis.error}
+        resumeName={upload.file?.name ?? ""}
       />
       <JobMatchSection
         resumeFile={upload.file}
         resumeReady={isReady}
         jobMatch={jobMatch}
+        gate={gate}
       />
       <CoverLetterSection
         resumeFile={upload.file}
         resumeReady={isReady}
         coverLetter={coverLetter}
+        gate={gate}
       />
     </>
   );

@@ -4,6 +4,9 @@ import { CircleAlert, Loader2, Target } from "lucide-react";
 
 import { JobDescriptionInput } from "@/components/sections/job-description-input";
 import { JobMatchReport } from "@/components/sections/job-match-report";
+import { SaveToDashboard } from "@/components/dashboard/save-to-dashboard";
+import { GenerationGate } from "@/components/credits/generation-gate";
+import type { GenerationGateState } from "@/components/credits/credits-provider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
@@ -14,6 +17,7 @@ interface JobMatchSectionProps {
   resumeFile: File | null;
   resumeReady: boolean;
   jobMatch: ReturnType<typeof useJobMatch>;
+  gate: GenerationGateState;
 }
 
 /**
@@ -26,11 +30,12 @@ function JobMatchSection({
   resumeFile,
   resumeReady,
   jobMatch,
+  gate,
 }: JobMatchSectionProps) {
   const { status, result, error, match, isMatching } = jobMatch;
   const jd = useJobDescriptionInput();
 
-  const canMatch = resumeReady && jd.hasValue && !isMatching;
+  const canMatch = resumeReady && jd.hasValue && !isMatching && !gate.blocked;
 
   const handleMatch = () => {
     if (!resumeFile || !jd.value || isMatching) return;
@@ -80,12 +85,21 @@ function JobMatchSection({
               Upload your resume above to run a job match.
             </p>
           )}
+          <GenerationGate gate={gate} />
         </div>
 
         {/* Result */}
         <div className="mt-6">
           {status === "success" && result ? (
-            <JobMatchReport match={result} />
+            <>
+              <JobMatchReport match={result} />
+              <SaveToDashboard
+                type="job-match"
+                payload={result}
+                resumeName={resumeFile?.name ?? ""}
+                defaultTitle="Job Match"
+              />
+            </>
           ) : status === "matching" ? (
             <Card className="animate-fade-in items-center gap-6 py-16 text-center">
               <span className="flex size-16 items-center justify-center rounded-2xl border border-border bg-secondary/60 text-brand">

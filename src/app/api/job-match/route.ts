@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { matchResumeToJob } from "@/lib/ai/match-resume";
+import { chargeCredits, ensureCredits } from "@/lib/credit-guard";
 import { resolveJobDescription } from "@/lib/job-match/inputs";
 import { extractResumeText } from "@/lib/pdf/extract";
 import { validateResumeFile } from "@/lib/resume";
@@ -51,6 +52,9 @@ function errorResponse(code: string, message: string) {
  * delegates to `matchResumeToJob`. Azure OpenAI is only reached from the server.
  */
 export async function POST(request: Request) {
+  const guard = await ensureCredits("job-match");
+  if ("error" in guard) return guard.error;
+
   let formData: FormData;
   try {
     formData = await request.formData();
@@ -94,6 +98,7 @@ export async function POST(request: Request) {
     resumeExtraction.data.extractedText,
     jobDescription.text
   );
+  if (result.ok) await chargeCredits(guard.userId, "job-match");
   return NextResponse.json(result, {
     status: result.ok ? 200 : statusForCode(result.error.code),
   });

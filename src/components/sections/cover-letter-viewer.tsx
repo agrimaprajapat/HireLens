@@ -22,8 +22,9 @@ import {
 
 interface CoverLetterViewerProps {
   coverLetter: CoverLetter;
-  onRegenerate: () => void;
-  canRegenerate: boolean;
+  /** Omit to hide the Regenerate action (e.g. when viewing a saved letter). */
+  onRegenerate?: () => void;
+  canRegenerate?: boolean;
 }
 
 /**
@@ -110,10 +111,12 @@ function CoverLetterViewer({
           <Download className="size-4" />
           {downloadingPdf ? "Preparing…" : "Download PDF"}
         </Button>
-        <Button onClick={onRegenerate} disabled={!canRegenerate}>
-          <RefreshCw className="size-4" />
-          Regenerate
-        </Button>
+        {onRegenerate && (
+          <Button onClick={onRegenerate} disabled={!canRegenerate}>
+            <RefreshCw className="size-4" />
+            Regenerate
+          </Button>
+        )}
       </div>
 
       {/* Strengths used */}

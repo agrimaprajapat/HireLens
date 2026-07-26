@@ -5,6 +5,9 @@ import { CircleAlert, Loader2, PenLine } from "lucide-react";
 
 import { CoverLetterViewer } from "@/components/sections/cover-letter-viewer";
 import { JobDescriptionInput } from "@/components/sections/job-description-input";
+import { SaveToDashboard } from "@/components/dashboard/save-to-dashboard";
+import { GenerationGate } from "@/components/credits/generation-gate";
+import type { GenerationGateState } from "@/components/credits/credits-provider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
@@ -22,6 +25,7 @@ interface CoverLetterSectionProps {
   resumeFile: File | null;
   resumeReady: boolean;
   coverLetter: ReturnType<typeof useCoverLetter>;
+  gate: GenerationGateState;
 }
 
 const TONE_LABELS: Record<CoverLetterTone, string> = {
@@ -40,6 +44,7 @@ function CoverLetterSection({
   resumeFile,
   resumeReady,
   coverLetter,
+  gate,
 }: CoverLetterSectionProps) {
   const { status, result, error, generate, isGenerating } = coverLetter;
   const jd = useJobDescriptionInput();
@@ -49,7 +54,8 @@ function CoverLetterSection({
   const [companyName, setCompanyName] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
 
-  const canGenerate = resumeReady && jd.hasValue && !isGenerating;
+  const canGenerate =
+    resumeReady && jd.hasValue && !isGenerating && !gate.blocked;
 
   const handleGenerate = () => {
     if (!resumeFile || !jd.value || isGenerating) return;
@@ -156,16 +162,25 @@ function CoverLetterSection({
               Upload your resume above to generate a cover letter.
             </p>
           )}
+          <GenerationGate gate={gate} />
         </div>
 
         {/* Result */}
         <div className="mt-6">
           {status === "success" && result ? (
-            <CoverLetterViewer
-              coverLetter={result}
-              onRegenerate={handleGenerate}
-              canRegenerate={canGenerate}
-            />
+            <>
+              <CoverLetterViewer
+                coverLetter={result}
+                onRegenerate={handleGenerate}
+                canRegenerate={canGenerate}
+              />
+              <SaveToDashboard
+                type="cover-letter"
+                payload={result}
+                resumeName={resumeFile?.name ?? ""}
+                defaultTitle="Cover Letter"
+              />
+            </>
           ) : status === "generating" ? (
             <Card className="animate-fade-in items-center gap-6 py-16 text-center">
               <span className="flex size-16 items-center justify-center rounded-2xl border border-border bg-secondary/60 text-brand">
