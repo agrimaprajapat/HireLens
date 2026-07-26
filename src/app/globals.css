@@ -1,0 +1,213 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  HireLens design system.
+
+  Foundation: warm "ink & paper" neutrals — a soft off-white ground, warm
+  near-black ink for type and primary actions, and a single restrained
+  petrol-teal brand accent used sparingly (lens mark, focus, small highlights).
+
+  Principles: hairline borders over shadows, a tight non-bubbly radius scale,
+  and an 8px spacing rhythm. Colors are oklch for perceptual consistency.
+*/
+:root {
+  --radius: 0.625rem;
+
+  /* Ground & type */
+  --background: oklch(0.985 0.004 85);
+  --foreground: oklch(0.24 0.007 55);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.007 55);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.007 55);
+
+  /* Primary = ink (confident, near-black) */
+  --primary: oklch(0.255 0.008 55);
+  --primary-foreground: oklch(0.985 0.004 85);
+
+  --secondary: oklch(0.965 0.005 80);
+  --secondary-foreground: oklch(0.32 0.007 55);
+
+  --muted: oklch(0.965 0.005 80);
+  --muted-foreground: oklch(0.53 0.008 60);
+
+  /* Neutral hover surface (not the brand color) */
+  --accent: oklch(0.955 0.006 80);
+  --accent-foreground: oklch(0.3 0.007 55);
+
+  /* Brand = restrained petrol teal */
+  --brand: oklch(0.52 0.082 202);
+  --brand-foreground: oklch(0.985 0 0);
+  --brand-muted: oklch(0.955 0.02 200);
+
+  --destructive: oklch(0.55 0.19 25);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border: oklch(0.912 0.005 75);
+  --input: oklch(0.9 0.006 75);
+  --ring: oklch(0.52 0.082 202);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-muted: var(--brand-muted);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.7s ease-out both;
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  --animate-scan: scan 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes shimmer {
+    0%,
+    100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* Vertical sweep for the upload "reading" state */
+  @keyframes scan {
+    0% {
+      transform: translateY(0);
+      opacity: 0;
+    }
+    15% {
+      opacity: 1;
+    }
+    85% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(220px);
+      opacity: 0;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/40;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv01", "cv03";
+  }
+
+  /* Display type: tighter tracking, optical-serif for confident headlines */
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+    font-feature-settings: "liga" 1, "dlig" 1;
+  }
+
+  /* Small uppercase eyebrow/section labels */
+  .eyebrow {
+    @apply text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /*
+    Subtle engineering-paper grid for the hero — hairline lines that fade out
+    toward the edges via a radial mask. Not a gradient blob; a quiet texture.
+  */
+  .bg-hero-grid {
+    background-image:
+      linear-gradient(to right, var(--border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 0%,
+      #000 0%,
+      transparent 75%
+    );
+    mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 0%,
+      #000 0%,
+      transparent 75%
+    );
+    opacity: 0.6;
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(npm ls *)",
+      "Bash(npm run *)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/unpdf/package.json'\\).version\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:56545/)",
+      "Bash(node -e \"console.log\\('openai', require\\('./node_modules/openai/package.json'\\).version\\); console.log\\('zod', require\\('./node_modules/zod/package.json'\\).version\\)\")",
+      "Bash(node -e \"const o=require\\('openai'\\); console.log\\('AzureOpenAI:', typeof o.AzureOpenAI\\); console.log\\('OpenAI:', typeof o.OpenAI\\)\")",
+      "Bash(node -e \"const z=require\\('openai/helpers/zod'\\); console.log\\(Object.keys\\(z\\)\\)\")",
+      "Bash(node -e \"const {AzureOpenAI}=require\\('openai'\\); const c=new AzureOpenAI\\({endpoint:'https://x',apiKey:'x',apiVersion:'2024-12-01-preview',deployment:'d'}\\); console.log\\('chat.completions.parse:', typeof c.chat.completions.parse\\); console.log\\('beta.chat.completions.parse:', typeof \\(c.beta&&c.beta.chat&&c.beta.chat.completions&&c.beta.chat.completions.parse\\)\\)\")",
+      "Bash(cat)",
+      "Bash(node run.mjs r_student.txt 62844)",
+      "Bash(node run.mjs r_experienced.txt 62844)",
+      "Bash(node run.mjs r_minimal.txt 62844)",
+      "Bash(node run.mjs r_messy.txt 62844)",
+      "Bash(node -e \"console.log\\('mammoth', require\\('./node_modules/mammoth/package.json'\\).version\\)\")",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{const p=JSON.parse\\(d\\);console.log\\('types field:',p.types||p.typings||'none'\\)}\\)\")",
+      "Bash(node -e \"const p=require\\('./node_modules/mammoth/package.json'\\); console.log\\('main:', p.main, '| browser:', p.browser\\)\")",
+      "Bash(node -e \"console.log\\('extractRawText:', typeof require\\('mammoth'\\).extractRawText\\)\")",
+      "Bash(node matchrun.mjs 56000 resume_backend.pdf text job.txt)",
+      "Bash(node matchrun.mjs 56000 resume_backend.pdf file job.pdf)",
+      "Bash(node matchrun.mjs 56000 resume_backend.pdf file job.docx)",
+      "Bash(node matchrun.mjs 56000 resume_student.pdf text job.txt)",
+      "Bash(node -e \"console.log\\('jspdf', require\\('./node_modules/jspdf/package.json'\\).version\\)\")",
+      "Bash(node clrun.mjs 63876 professional text job.txt)",
+      "Bash(node clrun.mjs 63876 confident text job.txt)",
+      "Bash(node clrun.mjs 63876 enthusiastic file job.pdf)",
+      "Bash(node clrun.mjs 63876 professional file job.docx \"Taylor Morgan\" \"Acme Corp\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const p='node_modules/openai/index.d.ts';const s=fs.readFileSync\\(p,'utf8'\\);\")",
+      "Bash(node -e \"const t=require\\('openai'\\); const c=new t.AzureOpenAI\\({endpoint:'https://x',apiKey:'x',apiVersion:'v',deployment:'d'}\\); console.log\\('client is OpenAI instance:', c instanceof t.OpenAI || c instanceof t.default || 'n/a'\\)\")",
+      "Bash(curl -s -o /dev/null -w \"server:%{http_code}\\\\n\" http://localhost:61017/)",
+      "Bash(node clrun.mjs 61017 enthusiastic file job.pdf)",
+      "Bash(node clrun.mjs 61017 professional file job.docx \"Taylor Morgan\" \"Acme Corp\")"
+    ]
+  }
+}
