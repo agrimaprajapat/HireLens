@@ -7,6 +7,13 @@
  * live in exactly one place.
  */
 
+/**
+ * Free AI credits granted to every new account. Single source of truth for the
+ * grant (see `getDbUser`) and the pricing/FAQ copy. The Prisma `@default` on
+ * `User.credits` must be kept in sync with this value.
+ */
+export const FREE_PLAN_CREDITS = 3;
+
 export const RESUME_UPLOAD = {
   /** The only accepted MIME type for resume uploads. */
   acceptedMimeType: "application/pdf",

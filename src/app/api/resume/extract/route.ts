@@ -2,10 +2,16 @@ import { NextResponse } from "next/server";
 
 import { extractResumeText } from "@/lib/pdf/extract";
 import type { ExtractionError, ExtractionResult } from "@/lib/pdf/types";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { validateResumeFile } from "@/lib/resume";
 
 // PDF parsing requires the Node.js runtime.
 export const runtime = "nodejs";
+
+// This endpoint is public (unauthenticated) and CPU/memory-intensive, so it gets
+// a basic per-IP rate limit. Authenticated AI routes rely on credits instead.
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 60_000;
 
 /** HTTP status for each structured outcome. */
 function statusFor(result: ExtractionResult): number {
@@ -42,6 +48,27 @@ function respond(result: ExtractionResult) {
  * reaches the client — this endpoint is the only place it runs.
  */
 export async function POST(request: Request) {
+  const limit = rateLimit(
+    `extract:${clientIp(request)}`,
+    RATE_LIMIT_MAX,
+    RATE_LIMIT_WINDOW_MS
+  );
+  if (!limit.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "rate_limited",
+          message: "Too many requests. Please wait a moment and try again.",
+        },
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      }
+    );
+  }
+
   let formData: FormData;
   try {
     formData = await request.formData();

@@ -2,6 +2,7 @@ import "server-only";
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 
+import { FREE_PLAN_CREDITS } from "@/lib/constants";
 import { prisma } from "@/lib/db";
 
 /**
@@ -27,6 +28,7 @@ export async function getDbUser() {
       name:
         [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ") ||
         null,
+      credits: FREE_PLAN_CREDITS,
     },
   });
 }

@@ -74,7 +74,8 @@ export interface GenerationGateState {
 export function useGenerationGate(): GenerationGateState {
   const { isLoaded, isSignedIn, credits } = useCredits();
   const needsSignIn = isLoaded && !isSignedIn;
-  const outOfCredits = isSignedIn && credits === 0;
+  // `credits !== null` guards the loading state — `null <= 0` is true in JS.
+  const outOfCredits = isSignedIn && credits !== null && credits <= 0;
   return {
     blocked: needsSignIn || outOfCredits,
     needsSignIn,

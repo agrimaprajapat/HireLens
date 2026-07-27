@@ -1,20 +1,22 @@
 import { z } from "zod";
 
+import {
+  COVER_LETTER_TONES,
+  type CoverLetterTone,
+} from "@/lib/ai/cover-letter-tones";
 import type { AnalysisError } from "@/lib/ai/schema";
 
 /**
  * Contract for cover-letter generation. Distinct from the resume and job-match
  * schemas. The AI returns the letter content; `wordCount` and `tone` are set
  * authoritatively by the server (see `generate-cover-letter.ts`).
+ *
+ * Tones live in `cover-letter-tones.ts` (dependency-free) so client components
+ * can use them without bundling zod; re-exported here for server convenience.
  */
 
-export const COVER_LETTER_TONES = [
-  "professional",
-  "confident",
-  "enthusiastic",
-] as const;
-
-export type CoverLetterTone = (typeof COVER_LETTER_TONES)[number];
+export { COVER_LETTER_TONES };
+export type { CoverLetterTone };
 
 /** The portion the model produces. */
 export const coverLetterAISchema = z.object({

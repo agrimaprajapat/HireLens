@@ -21,6 +21,7 @@ model User {
   clerkId   String   @unique
   email     String
   name      String?
+  // Keep the default in sync with FREE_PLAN_CREDITS in src/lib/constants.ts.
   credits   Int      @default(3)
   createdAt DateTime @default(now())
 

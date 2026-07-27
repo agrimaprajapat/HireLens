@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   COVER_LETTER_TONES,
   type CoverLetterTone,
-} from "@/lib/ai/cover-letter-schema";
+} from "@/lib/ai/cover-letter-tones";
 import { useCoverLetter } from "@/hooks/use-cover-letter";
 import { useJobDescriptionInput } from "@/hooks/use-job-description-input";
 import { cn } from "@/lib/utils";

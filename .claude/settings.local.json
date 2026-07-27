@@ -46,7 +46,29 @@
       "Bash(npx prisma *)",
       "Bash(curl -s -w \"\\\\n[%{http_code}]\\\\n\" http://localhost:3000/api/credits)",
       "Bash(curl -s -w \"\\\\n[%{http_code}]\\\\n\" -H \"Content-Type: application/json\" -d '{\"resumeText\":\"Jane Smith Engineer\"}' http://localhost:3000/api/resume/analyse)",
-      "Bash(curl -s -o /dev/null -w \"[%{http_code}]\\\\n\" http://localhost:3000/pricing)"
+      "Bash(curl -s -o /dev/null -w \"[%{http_code}]\\\\n\" http://localhost:3000/pricing)",
+      "Bash(curl -s -o /dev/null -w \"/pricing:%{http_code}\\\\n\" http://localhost:3000/pricing)",
+      "Bash(curl -s -o /dev/null -w \"/checkout?plan=student-pro:%{http_code}\\\\n\" \"http://localhost:3000/checkout?plan=student-pro\")",
+      "Bash(curl -s -o /dev/null -w \"pricing:%{http_code}\\\\n\" http://localhost:60663/pricing)",
+      "Bash(curl -s http://localhost:60663/checkout)",
+      "Bash(npx next *)",
+      "Bash(rm -rf .next)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"TSC_EXIT:$?\")",
+      "Bash(curl -s \"http://localhost:60663/checkout?plan=bogus\" -o /dev/null -w \"checkout-bogus:%{http_code}\\\\n\")",
+      "Bash(curl -s -o /dev/null -w \"pricing:%{http_code}\\\\n\" http://localhost:56892/pricing)",
+      "Bash(curl -s \"http://localhost:56892/checkout?plan=bogus\" -o /dev/null -w \"http:%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:56892/checkout?plan=bogus\")",
+      "Bash(curl -s \"http://localhost:56892/checkout?plan=student-pro\")",
+      "Bash(grep -E \"\\\\.env$|\\\\.env\\\\.local$\")",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(echo \"TSC: exit $?\")",
+      "Bash(node -e \"console.log\\(new Date\\('2026-07-26T23:30:00Z'\\).toLocaleDateString\\('en-US',{year:'numeric',month:'short',day:'numeric',timeZone:'UTC'}\\)\\)\")",
+      "Bash(TZ=\"Asia/Kolkata\" node -e \"console.log\\(new Date\\('2026-07-26T23:30:00Z'\\).toLocaleDateString\\('en-US',{year:'numeric',month:'short',day:'numeric',timeZone:'UTC'}\\)\\)\")",
+      "Bash(node -e \"console.log\\('@next/third-parties', require\\('./node_modules/@next/third-parties/package.json'\\).version\\)\")",
+      "Bash(echo \"tsc exit: $?\")",
+      "Bash(echo \"lint exit: $?\")",
+      "Bash(NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TEST00001 npx next dev -p 3021)"
     ]
   }
 }

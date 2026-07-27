@@ -16,11 +16,14 @@ interface SavedItemCardProps {
 
 type Action = "idle" | "duplicating" | "deleting";
 
+// Fixed locale + timezone so the string is identical on the server and client
+// (avoids a hydration mismatch; a runtime-dependent locale/timezone can differ).
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
+  return new Date(iso).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
   });
 }
 

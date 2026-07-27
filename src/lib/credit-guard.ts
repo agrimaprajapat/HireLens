@@ -7,6 +7,14 @@ import { CREDIT_COSTS, deductCredits, getCredits } from "@/lib/credits";
 import { jsonError } from "@/lib/http";
 import type { SavedType } from "@/lib/saved/types";
 
+// TODO(payments): the credit check (`ensureCredits`) and the deduction
+// (`chargeCredits`) are not atomic — two concurrent requests from the same user
+// can both pass the check before either deducts, allowing slightly more
+// generations than credits (the balance still never goes negative). When payment
+// integration lands, make credit deduction transactional: reserve a credit
+// before generation and refund on failure, or perform a single conditional
+// decrement inside a DB transaction.
+
 /**
  * Shared credit gate for AI routes. Confirms the caller is signed in and has
  * enough credits for the action, returning either the user id or a ready-made
