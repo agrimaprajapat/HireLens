@@ -25,9 +25,17 @@ model User {
   credits   Int      @default(3)
   createdAt DateTime @default(now())
 
-  resumeAnalyses ResumeAnalysis[]
-  jobMatches     JobMatch[]
-  coverLetters   CoverLetter[]
+  // Billing link only — a stable reference to the Paddle customer for checkout
+  // reuse. Plan state deliberately does NOT live here (see Subscription); the
+  // credit balance above remains the sole authorization mechanism.
+  paddleCustomerId String? @unique
+
+  resumeAnalyses   ResumeAnalysis[]
+  jobMatches       JobMatch[]
+  coverLetters     CoverLetter[]
+  payments         Payment[]
+  subscriptions    Subscription[]
+  billingAuditLogs BillingAuditLog[]
 }
 
 model ResumeAnalysis {
@@ -67,4 +75,92 @@ model CoverLetter {
   updatedAt  DateTime @updatedAt
 
   @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Billing (Paddle). Payments top up the credit balance on User; Subscription is
+// the source of truth for recurring plan state (User stays payment-agnostic).
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum BillingProvider {
+  paddle // future providers (e.g. stripe) can be added without a schema rewrite
+}
+
+enum PaymentStatus {
+  pending
+  completed
+  failed
+  refunded
+}
+
+enum SubscriptionStatus {
+  active
+  past_due
+  paused
+  canceled
+}
+
+/// One row per provider transaction. The money record + idempotency anchor:
+/// `providerTransactionId` is unique so credits are granted at most once per
+/// transaction, even under webhook retries.
+model Payment {
+  id                     String          @id @default(cuid())
+  userId                 String
+  user                   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider               BillingProvider @default(paddle)
+  providerTransactionId  String          @unique
+  providerSubscriptionId String? // set for subscription renewal transactions
+  planId                 String // paid plan id, e.g. "student-pro" (see src/lib/plans.ts)
+  status                 PaymentStatus   @default(pending)
+  amountMinor            Int // charged amount in minor units (no floats)
+  currency               String // ISO-4217, e.g. "USD", "INR"
+  creditsGranted         Int             @default(0) // credits this payment added (refund math + billing)
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+
+  @@index([userId])
+}
+
+/// Source of truth for recurring plan state (Student Pro). One-time purchases
+/// (Placement Pass) do not create a Subscription row.
+model Subscription {
+  id                     String             @id @default(cuid())
+  userId                 String
+  user                   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider               BillingProvider    @default(paddle)
+  providerSubscriptionId String             @unique
+  planId                 String
+  status                 SubscriptionStatus
+  currentPeriodEnd       DateTime // for display / renewal expectations, never for authorization
+  cancelAtPeriodEnd      Boolean            @default(false)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  @@index([userId])
+}
+
+/// Idempotency ledger for inbound provider webhooks. `providerEventId` is unique
+/// so duplicate/retried deliveries are de-duplicated.
+model WebhookEvent {
+  id              String          @id @default(cuid())
+  provider        BillingProvider @default(paddle)
+  providerEventId String          @unique
+  eventType       String
+  receivedAt      DateTime        @default(now())
+}
+
+/// Lightweight, append-only audit trail for billing events (support/debugging).
+/// Distinct from WebhookEvent (a machine dedup ledger); this is a human timeline.
+model BillingAuditLog {
+  id          String          @id @default(cuid())
+  userId      String?
+  user        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  provider    BillingProvider @default(paddle)
+  event       String // e.g. "checkout_created", "credits_granted", "refund_processed"
+  referenceId String? // related transaction / subscription / webhook event id
+  detail      Json? // small context: { planId, credits, amountMinor, currency }
+  createdAt   DateTime        @default(now())
+
+  @@index([userId])
+  @@index([referenceId])
 }

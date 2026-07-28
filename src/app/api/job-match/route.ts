@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { matchResumeToJob } from "@/lib/ai/match-resume";
-import { chargeCredits, ensureCredits } from "@/lib/credit-guard";
+import { getDbUser } from "@/lib/auth";
+import { refundCredit, reserveCreditOr402 } from "@/lib/credit-guard";
+import { jsonError } from "@/lib/http";
 import { resolveJobDescription } from "@/lib/job-match/inputs";
 import { extractResumeText } from "@/lib/pdf/extract";
 import { validateResumeFile } from "@/lib/resume";
@@ -52,8 +54,10 @@ function errorResponse(code: string, message: string) {
  * delegates to `matchResumeToJob`. Azure OpenAI is only reached from the server.
  */
 export async function POST(request: Request) {
-  const guard = await ensureCredits("job-match");
-  if ("error" in guard) return guard.error;
+  const user = await getDbUser();
+  if (!user) {
+    return jsonError("unauthorized", "Please sign in to use AI generation.", 401);
+  }
 
   let formData: FormData;
   try {
@@ -93,12 +97,17 @@ export async function POST(request: Request) {
     return errorResponse(jobDescription.error.code, jobDescription.error.message);
   }
 
-  // 3. Match.
+  // 3. Reserve a credit atomically, immediately before the AI call. Extraction
+  //    and JD resolution above are unpaid, so their failures never charge.
+  const noCredits = await reserveCreditOr402(user.id, "job-match");
+  if (noCredits) return noCredits;
+
+  // 4. Match.
   const result = await matchResumeToJob(
     resumeExtraction.data.extractedText,
     jobDescription.text
   );
-  if (result.ok) await chargeCredits(guard.userId, "job-match");
+  if (!result.ok) await refundCredit(user.id, "job-match");
   return NextResponse.json(result, {
     status: result.ok ? 200 : statusForCode(result.error.code),
   });

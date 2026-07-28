@@ -5,7 +5,9 @@ import {
   COVER_LETTER_TONES,
   type CoverLetterTone,
 } from "@/lib/ai/cover-letter-schema";
-import { chargeCredits, ensureCredits } from "@/lib/credit-guard";
+import { getDbUser } from "@/lib/auth";
+import { refundCredit, reserveCreditOr402 } from "@/lib/credit-guard";
+import { jsonError } from "@/lib/http";
 import { resolveJobDescription } from "@/lib/job-match/inputs";
 import { extractResumeText } from "@/lib/pdf/extract";
 import { validateResumeFile } from "@/lib/resume";
@@ -60,8 +62,10 @@ function optionalField(formData: FormData, name: string): string | undefined {
  * `generateCoverLetter`. Azure OpenAI is only reached from the server.
  */
 export async function POST(request: Request) {
-  const guard = await ensureCredits("cover-letter");
-  if ("error" in guard) return guard.error;
+  const user = await getDbUser();
+  if (!user) {
+    return jsonError("unauthorized", "Please sign in to use AI generation.", 401);
+  }
 
   let formData: FormData;
   try {
@@ -110,6 +114,11 @@ export async function POST(request: Request) {
     return errorResponse(jobDescription.error.code, jobDescription.error.message);
   }
 
+  // Reserve a credit atomically, immediately before the AI call. Extraction and
+  // JD resolution above are unpaid, so their failures never charge.
+  const noCredits = await reserveCreditOr402(user.id, "cover-letter");
+  if (noCredits) return noCredits;
+
   // Generate.
   const result = await generateCoverLetter({
     resumeText: resumeExtraction.data.extractedText,
@@ -120,7 +129,7 @@ export async function POST(request: Request) {
     additionalNotes: optionalField(formData, "additionalNotes"),
   });
 
-  if (result.ok) await chargeCredits(guard.userId, "cover-letter");
+  if (!result.ok) await refundCredit(user.id, "cover-letter");
   return NextResponse.json(result, {
     status: result.ok ? 200 : statusForCode(result.error.code),
   });

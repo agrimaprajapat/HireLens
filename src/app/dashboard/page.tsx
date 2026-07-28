@@ -4,10 +4,15 @@ import { redirect } from "next/navigation";
 import { Footer } from "@/components/layout/footer";
 import { LensMark } from "@/components/layout/logo";
 import { Navbar } from "@/components/layout/navbar";
+import { PurchaseHistory } from "@/components/billing/purchase-history";
 import { SavedItemCard } from "@/components/dashboard/saved-item-card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { getDbUser } from "@/lib/auth";
+import { getBillingSummary } from "@/lib/billing/summary";
+import { formatBillingDate } from "@/lib/billing/format";
+import type { BillingSummary } from "@/lib/billing/types";
 import { listSaved } from "@/lib/saved/service";
 import type { SavedItemSummary, SavedType } from "@/lib/saved/types";
 
@@ -51,15 +56,68 @@ function DashboardSection({
   );
 }
 
+/** Read-only billing overview: current plan, credits, subscription, history. */
+function BillingSection({ summary }: { summary: BillingSummary }) {
+  const { subscription } = summary;
+  return (
+    <section className="mt-14">
+      <h2 className="font-display text-xl font-medium tracking-tight">Billing</h2>
+      <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        <Card className="gap-1 p-5">
+          <span className="eyebrow">Current Plan</span>
+          <span className="font-display text-2xl font-medium tracking-tight">
+            {summary.plan?.label ?? "Free"}
+          </span>
+        </Card>
+        <Card className="gap-1 p-5">
+          <span className="eyebrow">Credits</span>
+          <span className="font-display text-2xl font-medium tracking-tight tabular-nums">
+            {summary.credits}
+          </span>
+        </Card>
+        <Card className="gap-1 p-5">
+          <span className="eyebrow">Subscription</span>
+          {subscription ? (
+            <>
+              <span className="text-sm font-medium capitalize">
+                {subscription.status.replace("_", " ")}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {subscription.cancelAtPeriodEnd ? "Ends" : "Renews"}{" "}
+                {formatBillingDate(subscription.currentPeriodEnd)}
+              </span>
+            </>
+          ) : (
+            <span className="text-sm text-muted-foreground">
+              No active subscription
+            </span>
+          )}
+        </Card>
+      </div>
+
+      <div className="mt-8">
+        <h3 className="font-display text-lg font-medium tracking-tight">
+          Purchase history
+        </h3>
+        <div className="mt-4">
+          <PurchaseHistory />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default async function DashboardPage() {
   const user = await getDbUser();
   if (!user) redirect("/sign-in");
 
-  const [analyses, jobMatches, coverLetters] = await Promise.all([
-    listSaved(user.id, "resume-analysis"),
-    listSaved(user.id, "job-match"),
-    listSaved(user.id, "cover-letter"),
-  ]);
+  const [analyses, jobMatches, coverLetters, billingSummary] =
+    await Promise.all([
+      listSaved(user.id, "resume-analysis"),
+      listSaved(user.id, "job-match"),
+      listSaved(user.id, "cover-letter"),
+      getBillingSummary(user.id),
+    ]);
 
   const total = analyses.length + jobMatches.length + coverLetters.length;
   const firstName = user.name?.split(" ")[0];
@@ -123,6 +181,8 @@ export default async function DashboardPage() {
               />
             </div>
           )}
+
+          <BillingSection summary={billingSummary} />
         </Container>
       </main>
       <Footer />

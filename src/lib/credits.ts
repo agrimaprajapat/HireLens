@@ -23,16 +23,31 @@ export async function getCredits(userId: string): Promise<number> {
 }
 
 /**
- * Deduct credits after a successful AI response. Guarded so the balance can
- * never go negative under concurrent requests. Returns the new balance.
+ * Atomically reserve credits before an AI action.
+ *
+ * A single conditional decrement (`credits >= amount` guard) both checks and
+ * deducts in one statement, so concurrent requests can never both spend the last
+ * credit and the balance can never go negative. Returns true if the credits were
+ * reserved, false if the user has too few.
  */
-export async function deductCredits(
+export async function reserveCredits(
   userId: string,
   amount: number
-): Promise<number> {
-  await prisma.user.updateMany({
+): Promise<boolean> {
+  const result = await prisma.user.updateMany({
     where: { id: userId, credits: { gte: amount } },
     data: { credits: { decrement: amount } },
   });
-  return getCredits(userId);
+  return result.count > 0;
+}
+
+/** Refund previously reserved credits after a failed generation. */
+export async function refundCredits(
+  userId: string,
+  amount: number
+): Promise<void> {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { credits: { increment: amount } },
+  });
 }

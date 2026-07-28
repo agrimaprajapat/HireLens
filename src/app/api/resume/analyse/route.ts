@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { analyseResume } from "@/lib/ai/analyse-resume";
-import { chargeCredits, ensureCredits } from "@/lib/credit-guard";
+import { getDbUser } from "@/lib/auth";
+import { refundCredit, reserveCreditOr402 } from "@/lib/credit-guard";
+import { jsonError } from "@/lib/http";
 import type { AnalyseResult } from "@/lib/ai/schema";
 
 // The Azure OpenAI call needs the Node.js runtime and some headroom on latency.
@@ -33,8 +35,10 @@ function statusFor(result: AnalyseResult): number {
  * browser.
  */
 export async function POST(request: Request) {
-  const guard = await ensureCredits("resume-analysis");
-  if ("error" in guard) return guard.error;
+  const user = await getDbUser();
+  if (!user) {
+    return jsonError("unauthorized", "Please sign in to use AI generation.", 401);
+  }
 
   let body: unknown;
   try {
@@ -66,7 +70,11 @@ export async function POST(request: Request) {
     );
   }
 
+  // Atomically reserve a credit immediately before generation.
+  const noCredits = await reserveCreditOr402(user.id, "resume-analysis");
+  if (noCredits) return noCredits;
+
   const result = await analyseResume(resumeText);
-  if (result.ok) await chargeCredits(guard.userId, "resume-analysis");
+  if (!result.ok) await refundCredit(user.id, "resume-analysis");
   return NextResponse.json(result, { status: statusFor(result) });
 }

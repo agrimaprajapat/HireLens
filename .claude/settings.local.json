@@ -68,7 +68,29 @@
       "Bash(node -e \"console.log\\('@next/third-parties', require\\('./node_modules/@next/third-parties/package.json'\\).version\\)\")",
       "Bash(echo \"tsc exit: $?\")",
       "Bash(echo \"lint exit: $?\")",
-      "Bash(NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TEST00001 npx next dev -p 3021)"
+      "Bash(NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TEST00001 npx next dev -p 3021)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/@paddle/paddle-node-sdk/package.json'\\).version\\)\")",
+      "Bash(node -e \"const p=require\\('@paddle/paddle-node-sdk'\\); console.log\\('Paddle:', typeof p.Paddle, '| Environment:', JSON.stringify\\(p.Environment\\)\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(echo \"typecheck exit: $?\")",
+      "Bash(node -e \"console.log\\('@paddle/paddle-js', require\\('./node_modules/@paddle/paddle-js/package.json'\\).version\\)\")",
+      "Bash(node -e \"const {Paddle}=require\\('@paddle/paddle-node-sdk'\\); const p=new Paddle\\('pdl_test'\\); console.log\\('customers.create:',typeof p.customers.create,'| customers.list:',typeof p.customers.list,'| transactions.create:',typeof p.transactions.create\\)\")",
+      "Bash(xargs grep -ln \"CreateTransactionRequestBody\\\\|interface CreateTransaction\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(curl -s -o /dev/null \"http://localhost:3020/\")",
+      "Bash(curl -s -w \"\\\\n[HTTP %{http_code}]\\\\n\" -H \"Content-Type: application/json\" -d '{\"planId\":\"student-pro\"}' http://localhost:3020/api/paddle/checkout)",
+      "Bash(curl -s -o /dev/null -w \"[HTTP %{http_code}]\\\\n\" -X POST http://localhost:3020/api/paddle/checkout)",
+      "Bash(curl -s -o /dev/null -w \"[HTTP %{http_code}]\\\\n\" http://localhost:3020/api/paddle/checkout)",
+      "Bash(curl -s http://localhost:3020/pricing)",
+      "Bash(echo \"typecheck: $?\")",
+      "Bash(echo \"lint: $?\")",
+      "Bash(PADDLE_API_KEY=pdl_test123 PADDLE_WEBHOOK_SECRET=whsec_test123 npx next start -p 3021)",
+      "Bash(echo \"lint\\(strict\\): $?\")",
+      "Bash(curl -s -o /dev/null \"http://localhost:3023/\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3023/api/billing/history)",
+      "Bash(echo \"billing/history \\(unauth\\):        $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3023/api/billing/history\\)\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3023/api/billing/payment-status?transactionId=x')",
+      "Bash(echo \"billing/payment-status \\(unauth\\): $\\(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3023/api/billing/payment-status?transactionId=x'\\)\")"
     ]
   }
 }
